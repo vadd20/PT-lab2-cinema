@@ -21,7 +21,7 @@ public class TablePlaces {
         String createSessionTable = "" +
                 "CREATE TABLE IF NOT EXISTS places (" +
                 "id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY NOT NULL," +
-                "hall_id integer REFERENCES halls(id) NOT NULL," +
+                "session_id integer REFERENCES sessions(id) NOT NULL," +
                 "row_value integer NOT NULL," +
                 "column_value integer NOT NULL," +
                 "value text NOT NULL)";
@@ -29,11 +29,12 @@ public class TablePlaces {
     }
 
     public void showStatsAndEarnings() throws SQLException {
-        String selectQuery = "SELECT places.hall_id, COUNT(*) AS count, halls.price\n" +
+        String selectQuery = "SELECT places.session_id, COUNT(*) AS count, halls.price\n" +
                 "FROM places\n" +
-                "INNER JOIN halls ON places.hall_id = halls.id\n" +
+                "INNER JOIN sessions ON places.session_id = sessions.id\n" +
+                "INNER JOIN halls ON sessions.hall_id = halls.id\n" +
                 "WHERE places.value = '*'\n" +
-                "GROUP BY places.hall_id, halls.price;";
+                "GROUP BY places.session_id, halls.price;";
         try (Connection connection = dataSource.getConnection();
              Statement statement = connection.createStatement()) {
 
@@ -49,11 +50,11 @@ public class TablePlaces {
     }
 
     public void deletePlaces(int id) throws SQLException {
-        String selectPlacesQuery = "SELECT * FROM places WHERE hall_id = ?";
-        String deleteQeury = "DELETE FROM places WHERE hall_id = ?";
+        String selectPlacesQuery = "SELECT * FROM places WHERE session_id = ?";
+        String deleteQuery = "DELETE FROM places WHERE session_id = ?";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement preparedSelectPlacesStatement = connection.prepareStatement(selectPlacesQuery);
-            PreparedStatement preparedDeleteStatement = connection.prepareStatement(deleteQeury)) {
+            PreparedStatement preparedDeleteStatement = connection.prepareStatement(deleteQuery)) {
             preparedSelectPlacesStatement.setInt(1, id);
             ResultSet placesRs = preparedSelectPlacesStatement.executeQuery();
             if (placesRs.next()) {

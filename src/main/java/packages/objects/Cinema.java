@@ -23,8 +23,8 @@ public class Cinema implements Creatable, Updatable {
     public void createByAdmin() {
         System.out.println("введи название, адрес и количество свободных залов");
         Scanner scanner = new Scanner(System.in);
-        String name = scanner.next();
-        String address = scanner.next();
+        String name = scanner.nextLine();
+        String address = scanner.nextLine();
         int numberOfFreeHalls = scanner.nextInt();
         this.name = name;
         this.maxCapacity = 1000;
@@ -32,10 +32,6 @@ public class Cinema implements Creatable, Updatable {
         this.numberOfFreeHalls = numberOfFreeHalls;
     }
 
-    @Override
-    public void updateByAdmin() throws SQLException {
-
-    }
 
     public void createCinemaFromDb(int id, String name, int maxCapacity, String address, int numberOfFreeHalls) {
         this.id = id;
@@ -45,4 +41,8 @@ public class Cinema implements Creatable, Updatable {
         this.numberOfFreeHalls = numberOfFreeHalls;
     }
 
+    @Override
+    public void updateByAdmin() throws SQLException {
+
+    }
 }

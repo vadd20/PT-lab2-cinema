@@ -17,22 +17,19 @@ public class MyUtils {
     MyUtils(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
     }
-    public void getAndSetSessionData() throws SQLException {
+    public static int getSessionId() throws SQLException {
         Scanner scanner = new Scanner(System.in);
         int sessionId;
         try {
             sessionId = scanner.nextInt();
+            return sessionId;
         } catch (InputMismatchException exception) {
             System.out.println("Вы ввели неверное число. Попробуйте еще раз");
-            getAndSetSessionData();
-            return;
+            return getSessionId();
         }
+//        TableCinema tableCinema = applicationContext.getBean(TableCinema.class);
+//        tableCinema.getCinemaData(sessionId);
 
-        TableCinema tableCinema = applicationContext.getBean(TableCinema.class);
-        tableCinema.getCinemaData(sessionId);
-
-        TableHall tableHall = applicationContext.getBean(TableHall.class);
-        tableHall.getHallData(sessionId);
     }
 
     public static ArrayList<ArrayList<String>> createEmptyArrayOfPlaces (int rows, int columns) {

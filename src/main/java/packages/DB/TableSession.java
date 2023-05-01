@@ -1,7 +1,9 @@
 package packages.DB;
 
 import org.postgresql.util.LruCache;
+import packages.MyUtils;
 import packages.objects.Creatable;
+import packages.objects.Hall;
 import packages.objects.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -36,6 +38,70 @@ public class TableSession implements InsertableToDb, UpdatableInDb, RemovableFro
         DbUtil.applyDdl(createSessionTable, dataSource);
     }
 
+    public Session getSessionData (int id) throws SQLException{
+        String selectQuery = "" +
+                "   SELECT id, hall_id, film_id, time time FROM sessions WHERE id = ?";
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(selectQuery)) {
+            preparedStatement.setInt(1, id);
+            ResultSet rs = preparedStatement.executeQuery();
+            rs.next();
+            return rsToSession(rs);
+        }
+    }
+
+    private Session rsToSession (ResultSet rs) throws SQLException {
+        int id = rs.getInt(1);
+        int hall_id = rs.getInt(2);
+        int film_id = rs.getInt(3);
+        String time = rs.getString(4);
+
+        TableHall tableHall = applicationContext.getBean(TableHall.class);
+        int rows = tableHall.getHallRowAndColumn(hall_id).get(0);
+        int columns = tableHall.getHallRowAndColumn(hall_id).get(1);
+
+        ArrayList<ArrayList<String>> places = getPlacesFromDb(id, rows, columns);
+        Session session = new Session();
+        session.createSessionFromDb(id, hall_id, film_id, time, places, rows, columns);
+        return session;
+    }
+    private ArrayList<ArrayList<String>> getPlacesFromDb (int hall_id, int rows, int columns) throws SQLException {
+        String selectQuery = "" +
+                "   SELECT row_value, column_value, value " +
+                "   FROM places WHERE session_id = ?";
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(selectQuery)){
+            preparedStatement.setInt(1, hall_id);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            ArrayList<ArrayList<String>> places = new ArrayList<>();
+            for (int i = 0; i < rows; i++) {
+                ArrayList<String> innerList = new ArrayList<>();
+                places.add(innerList);
+                for (int j = 0; j < columns; j++) {
+                    innerList.add(null);
+                }
+            }
+
+            while (resultSet.next()) {
+                places.get(resultSet.getInt(1) - 1).set(resultSet.getInt(2) - 1, resultSet.getString(3));
+            }
+
+            return places;
+        }
+    }
+
+    public void reservePlaceInDb (int id, int row, int column) throws SQLException {
+        String updateQuery = "UPDATE places SET value = '*' WHERE session_id = ? AND row_value = ? AND column_value = ?";
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(updateQuery)) {
+            preparedStatement.setInt(1, id);
+            preparedStatement.setInt(2, row);
+            preparedStatement.setInt(3, column);
+            preparedStatement.executeUpdate();
+        }
+    }
+
     public void insertToDbByAdmin(Creatable session) throws SQLException {
         String insertQuery = "INSERT INTO Sessions (hall_id, film_id, time) values (?, ?, ?)";
         String selectQuery = "SELECT id FROM Sessions ORDER BY id DESC LIMIT 1";
@@ -50,6 +116,28 @@ public class TableSession implements InsertableToDb, UpdatableInDb, RemovableFro
             ResultSet rs = statement.executeQuery(selectQuery);
             rs.next();
             ((Session) session).setId(rs.getInt(1));
+
+
+            addPlacesToTable(((Session) session).getPlaces(), ((Session) session).getRows(),
+                    ((Session)session).getColumns(), ((Session)session).getId());
+        }
+    }
+
+
+    private void addPlacesToTable (ArrayList<ArrayList<String>> places, int rows, int columns, int id) throws SQLException {
+        String insertQuery = "INSERT INTO places (session_id, row_value, column_value, value) values (?, ?, ?, ?)";
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
+            for (int i = 0; i < rows; ++i) {
+                for (int j = 0; j < columns; ++j) {
+                    preparedStatement.setInt(1, id);
+                    preparedStatement.setInt(2, i + 1);
+                    preparedStatement.setInt(3, j + 1);
+                    preparedStatement.setString(4, places.get(i).get(j));
+                    preparedStatement.execute();
+                }
+            }
+            //preparedStatement.executeBatch();
         }
     }
 
@@ -108,16 +196,26 @@ public class TableSession implements InsertableToDb, UpdatableInDb, RemovableFro
             preparedStatement.setString(3, data.get(3));
             preparedStatement.setInt(4, Integer.parseInt(data.get(0)));
             preparedStatement.executeUpdate();
+            TableHall tableHall = applicationContext.getBean(TableHall.class);
+            int rows = tableHall.getHallRowAndColumn(Integer.parseInt(data.get(1))).get(0);
+            int columns = tableHall.getHallRowAndColumn(Integer.parseInt(data.get(1))).get(1);
+
+            ArrayList<ArrayList<String>> places = MyUtils.createEmptyArrayOfPlaces(rows, columns);
+            addPlacesToTable(places, rows, columns, Integer.parseInt(data.get(0)));
         }
     }
 
     @Override
     public void removeFromDb(int id) throws SQLException {
-        String deleteQuery = "DELETE FROM Sessions WHERE id = ?";
+        String deleteQuery = "DELETE FROM sessions WHERE id = ?";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(deleteQuery)) {
+            TablePlaces tablePlaces = applicationContext.getBean(TablePlaces.class);
+            tablePlaces.deletePlaces(id);
+
             preparedStatement.setInt(1, id);
             preparedStatement.executeUpdate();
         }
+
     }
 }

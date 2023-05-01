@@ -13,7 +13,7 @@ import java.util.ArrayList;
 
 @Component
 public class TableHall implements InsertableToDb, UpdatableInDb, RemovableFromDb {
-    private DataSource dataSource;
+    private static DataSource dataSource;
     private ApplicationContext applicationContext;
 
 
@@ -37,102 +37,64 @@ public class TableHall implements InsertableToDb, UpdatableInDb, RemovableFromDb
         DbUtil.applyDdl(createHallTable, dataSource);
     }
 
+    @Override
     public void insertToDbByAdmin(Creatable hall) throws SQLException {
         String insertQuery = "INSERT INTO Halls (rows, columns, price, type, cinema_id) values (?, ?, ?, ?, ?)";
         String selectQuery = "SELECT id FROM Halls ORDER BY id DESC LIMIT 1";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(insertQuery);
              Statement statement = connection.createStatement()) {
-            preparedStatement.setInt(1, ((Hall)hall).getRows());
-            preparedStatement.setInt(2, ((Hall)hall).getColumns());
-            preparedStatement.setInt(3, ((Hall)hall).getPrice());
-            preparedStatement.setString(4, ((Hall)hall).getType());
-            preparedStatement.setInt(5, ((Hall)hall).getCinema_id());
+            preparedStatement.setInt(1, ((Hall) hall).getRows());
+            preparedStatement.setInt(2, ((Hall) hall).getColumns());
+            preparedStatement.setInt(3, ((Hall) hall).getPrice());
+            preparedStatement.setString(4, ((Hall) hall).getType());
+            preparedStatement.setInt(5, ((Hall) hall).getCinema_id());
             preparedStatement.execute();
 
             ResultSet rs = statement.executeQuery(selectQuery);
             rs.next();
-            ((Hall)hall).setId(rs.getInt(1));
-
-            addPlacesToTable(((Hall)hall).getPlaces(), ((Hall)hall).getRows(),
-                    ((Hall)hall).getColumns(), ((Hall)hall).getId());
+            ((Hall) hall).setId(rs.getInt(1));
         }
     }
 
-    private void addPlacesToTable (ArrayList<ArrayList<String>> places, int rows, int columns, int id) throws SQLException {
-        String insertQuery = "INSERT INTO places (hall_id, row_value, column_value, value) values (?, ?, ?, ?)";
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
-            for (int i = 0; i < rows; ++i) {
-                for (int j = 0; j < columns; ++j) {
-                    preparedStatement.setInt(1, id);
-                    preparedStatement.setInt(2, i + 1);
-                    preparedStatement.setInt(3, j + 1);
-                    preparedStatement.setString(4, places.get(i).get(j));
-                    preparedStatement.execute();
-                }
-            }
-            //preparedStatement.executeBatch();
-        }
-    }
 
-    public void getHallData (int sessionId) throws SQLException {
+    public Hall getHallData(int sessionId) throws SQLException {
         String selectQuery = "" +
                 "   SELECT * FROM halls WHERE id = (" +
                 "   SELECT hall_id FROM sessions WHERE id = ?)";
         try (Connection connection = dataSource.getConnection();
-        PreparedStatement preparedStatement = connection.prepareStatement(selectQuery)) {
+             PreparedStatement preparedStatement = connection.prepareStatement(selectQuery)) {
             preparedStatement.setInt(1, sessionId);
             ResultSet rs = preparedStatement.executeQuery();
             rs.next();
-            rsToHall(rs);
+            return rsToHall(rs);
         }
     }
 
-    private void rsToHall (ResultSet rs) throws SQLException {
+
+    private Hall rsToHall(ResultSet rs) throws SQLException {
         int hall_id = rs.getInt(1);
         int rows = rs.getInt(2);
         int columns = rs.getInt(3);
-        ArrayList<ArrayList<String>> places = getPlaces(hall_id, rows, columns);
 
-        Hall hall = applicationContext.getBean(Hall.class);
-        hall.createHallFromDb(hall_id, rows, columns, rs.getInt(4), rs.getString(5), rs.getInt(6), places);
+        Hall hall = new Hall();
+        hall.createHallFromDb(hall_id, rows, columns, rs.getInt(4), rs.getString(5), rs.getInt(6));
+        return hall;
     }
 
-    private ArrayList<ArrayList<String>> getPlaces (int hall_id, int rows, int columns) throws SQLException {
+    public static ArrayList<Integer> getHallRowAndColumn(int id) throws SQLException {
+        ArrayList<Integer> rowAndColumn = new ArrayList<>();
         String selectQuery = "" +
-                "   SELECT row_value, column_value, value " +
-                "   FROM places WHERE hall_id = ?";
+                "   SELECT rows, columns FROM halls WHERE id = ?";
         try (Connection connection = dataSource.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(selectQuery)){
-            preparedStatement.setInt(1, hall_id);
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            ArrayList<ArrayList<String>> places = new ArrayList<>();
-            for (int i = 0; i < rows; i++) {
-                ArrayList<String> innerList = new ArrayList<>();
-                places.add(innerList);
-                for (int j = 0; j < columns; j++) {
-                    innerList.add(null);
-                }
-            }
-
-            while (resultSet.next()) {
-                places.get(resultSet.getInt(1) - 1).set(resultSet.getInt(2) - 1, resultSet.getString(3));
-            }
-
-            return places;
-        }
-    }
-
-    public void reservePlaceInDb (int id, int row, int column) throws SQLException {
-        String updateQuery = "UPDATE places SET value = '*' WHERE hall_id = ? AND row_value = ? AND column_value = ?";
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(updateQuery)) {
+             PreparedStatement preparedStatement = connection.prepareStatement(selectQuery)) {
             preparedStatement.setInt(1, id);
-            preparedStatement.setInt(2, row);
-            preparedStatement.setInt(3, column);
-            preparedStatement.executeUpdate();
+            ResultSet rs = preparedStatement.executeQuery();
+            if (rs.next()) {
+                rowAndColumn.add(rs.getInt(1));
+                rowAndColumn.add(rs.getInt(2));
+            }
+            return rowAndColumn;
         }
     }
 
@@ -154,7 +116,7 @@ public class TableHall implements InsertableToDb, UpdatableInDb, RemovableFromDb
         // можем обновлять, если в зале нет сеанса. если есть, то обновляем данные
         String updateQuery = "UPDATE halls SET rows = ?, columns = ?, price = ?, type = ?, cinema_id = ?" +
                 " WHERE id = ?";
-        String deleteQuery = "DELETE FROM places WHERE hall_id = ?";
+        String deleteQuery = "DELETE FROM places WHERE session_id = ?";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(updateQuery);
              PreparedStatement preparedDeleteStatement = connection.prepareStatement(deleteQuery)) {
@@ -169,12 +131,6 @@ public class TableHall implements InsertableToDb, UpdatableInDb, RemovableFromDb
             preparedDeleteStatement.setInt(1, Integer.parseInt(data.get(0)));
             preparedDeleteStatement.executeUpdate();
 
-            ArrayList<ArrayList<String>> places = MyUtils.createEmptyArrayOfPlaces(Integer.parseInt(data.get(1)),
-                    Integer.parseInt(data.get(2)));
-            addPlacesToTable(places,
-                    Integer.parseInt(data.get(1)),
-                    Integer.parseInt(data.get(2)),
-                    Integer.parseInt(data.get(0)));
         }
     }
 
@@ -192,10 +148,6 @@ public class TableHall implements InsertableToDb, UpdatableInDb, RemovableFromDb
                 RemovableFromDb tableSession = applicationContext.getBean(TableSession.class);
                 tableSession.removeFromDb(sessionRs.getInt(1));
             }
-
-            TablePlaces tablePlaces = applicationContext.getBean(TablePlaces.class);
-            tablePlaces.deletePlaces(id);
-
             preparedDeleteStatement.setInt(1, id);
             preparedDeleteStatement.executeUpdate();
         }

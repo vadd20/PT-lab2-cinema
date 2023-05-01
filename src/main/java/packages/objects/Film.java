@@ -18,9 +18,10 @@ public class Film implements Creatable {
     public void createByAdmin () {
         System.out.println("введи название, год, жанр, длительность, формат");
         Scanner scanner = new Scanner(System.in);
-        String name = scanner.next();
+        String name = scanner.nextLine();
         int year = scanner.nextInt();
-        String genre = scanner.next();
+        scanner.next();
+        String genre = scanner.nextLine();
         int time = scanner.nextInt();
         String format = scanner.next();
         this.name = name;

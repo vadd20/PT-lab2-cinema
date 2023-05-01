@@ -40,13 +40,13 @@ public class TableCinema implements InsertableToDb, UpdatableInDb, RemovableFrom
         String insertQuery = "INSERT INTO cinemas (name, \"max capacity\", address, \"number of free halls\") values (?, ?, ?, ?)";
         String selectQuery = "SELECT id FROM cinemas ORDER BY id DESC LIMIT 1";
         try (Connection connection = dataSource.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(insertQuery);
+             PreparedStatement preparedUpdateStatement = connection.prepareStatement(insertQuery);
              Statement statement = connection.createStatement()) {
-            preparedStatement.setString(1, ((Cinema) cinema).getName());
-            preparedStatement.setInt(2, ((Cinema) cinema).getMaxCapacity());
-            preparedStatement.setString(3, ((Cinema) cinema).getAddress());
-            preparedStatement.setInt(4, ((Cinema) cinema).getNumberOfFreeHalls());
-            preparedStatement.execute();
+            preparedUpdateStatement.setString(1, ((Cinema) cinema).getName());
+            preparedUpdateStatement.setInt(2, ((Cinema) cinema).getMaxCapacity());
+            preparedUpdateStatement.setString(3, ((Cinema) cinema).getAddress());
+            preparedUpdateStatement.setInt(4, ((Cinema) cinema).getNumberOfFreeHalls());
+            preparedUpdateStatement.execute();
 
             ResultSet rs = statement.executeQuery(selectQuery);
             rs.next();
@@ -55,35 +55,21 @@ public class TableCinema implements InsertableToDb, UpdatableInDb, RemovableFrom
     }
 
 
-    public void getCinemaData(int sessionId) throws SQLException {
-        String selectCinemaQuery = "" +
-                "SELECT * FROM cinemas WHERE id = (" +
-                "   SELECT cinema_id FROM halls WHERE id = (" +
-                "   SELECT hall_id FROM sessions WHERE id = ?" +
-                "   )" +
-                ")";
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(selectCinemaQuery)) {
-            preparedStatement.setInt(1, sessionId);
-            ResultSet rs = preparedStatement.executeQuery();
-            rs.next();
-            rsToCinema(rs);
-        }
-    }
-
-    private void rsToCinema(ResultSet rs) throws SQLException {
-        Cinema cinema = new Cinema();
-        cinema.createCinemaFromDb(rs.getInt(1), rs.getString(2), rs.getInt(3), rs.getString(4), rs.getInt(5));
-    }
-
     public Boolean checkAvailableHalls(int id) throws SQLException {
         String selectQuery = "SELECT \"number of free halls\" FROM cinemas WHERE id = ?";
+        String updateQuery = "UPDATE cinemas SET \"number of free halls\" = GREATEST(\"number of free halls\" - 1, 0)" +
+                " WHERE id = ?";
         try (Connection connection = dataSource.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(selectQuery)) {
+             PreparedStatement preparedStatement = connection.prepareStatement(selectQuery);
+             PreparedStatement preparedUpdateStatement = connection.prepareStatement(updateQuery)) {
             preparedStatement.setInt(1, id);
             ResultSet rs = preparedStatement.executeQuery();
             if (rs.next()) {
-                return rs.getInt(1) > 0;
+                if (rs.getInt(1) >= 0) {
+                    preparedUpdateStatement.setInt(1, id);
+                    preparedUpdateStatement.executeUpdate();
+                    return true;
+                }
             }
             return false;
         }
@@ -107,12 +93,12 @@ public class TableCinema implements InsertableToDb, UpdatableInDb, RemovableFrom
         String updateQuery = "UPDATE cinemas SET name = ?, address = ?, \"number of free halls\" = ?" +
                 " WHERE id = ?";
         try (Connection connection = dataSource.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(updateQuery)) {
-            preparedStatement.setString(1, data.get(1));
-            preparedStatement.setString(2, data.get(2));
-            preparedStatement.setInt(3, Integer.parseInt(data.get(3)));
-            preparedStatement.setInt(4, Integer.parseInt(data.get(0)));
-            preparedStatement.executeUpdate();
+             PreparedStatement preparedUpdateStatement = connection.prepareStatement(updateQuery)) {
+            preparedUpdateStatement.setString(1, data.get(1));
+            preparedUpdateStatement.setString(2, data.get(2));
+            preparedUpdateStatement.setInt(3, Integer.parseInt(data.get(3)));
+            preparedUpdateStatement.setInt(4, Integer.parseInt(data.get(0)));
+            preparedUpdateStatement.executeUpdate();
         }
     }
 

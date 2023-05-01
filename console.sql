@@ -1,0 +1,1 @@
+TRUNCATE admins, cinemas, films, halls, places, sessions RESTART IDENTITY

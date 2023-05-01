@@ -10,7 +10,7 @@ public interface Client {
     // метод isExist. проверяет, существует ли юзер в бд. если нет - зарегистируйся
     //
     void chooseAvailableSessions () throws SQLException;
-    void chooseSession () throws SQLException;
-    void buyTicket() throws SQLException;
+    int chooseSession () throws SQLException;
+    void buyTicket(int sessionId) throws SQLException;
 }
 

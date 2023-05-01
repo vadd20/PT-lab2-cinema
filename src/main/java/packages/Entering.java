@@ -103,6 +103,7 @@ public class Entering {
         System.out.println("Чтобы изменить существующий - введите 2");
         System.out.println("Чтобы удалить - введите 3");
         System.out.println("Чтобы показать статистику - введите 4");
+        System.out.println("Чтобы вернуться назад - введите 5");
         Scanner scanner = new Scanner(System.in);
         String option = scanner.nextLine();
         switch (option) {
@@ -130,6 +131,9 @@ public class Entering {
                     manageObjects(admin);
                 }
             }
+            case "5" -> {
+                chooseUser();
+            }
             default -> {
                 System.out.println("Вы ввели неверное число. Попробуйте еще раз");
                 manageObjects(admin);
@@ -142,6 +146,7 @@ public class Entering {
         System.out.println("Чтобы создать зал, введите - 2");
         System.out.println("Чтобы создать сеанс, введите - 3");
         System.out.println("Чтобы создать фильм, введите - 4");
+        System.out.println("Чтобы вернуться назад - введите 5");
 
         Scanner scanner = new Scanner(System.in);
         String option = scanner.nextLine();
@@ -170,6 +175,9 @@ public class Entering {
                     createObject(admin);
                 }
             }
+            case "5" -> {
+                manageObjects(admin);
+            }
             default -> {
                 System.out.println("Вы ввели неверное число. Попробуйте еще раз");
                 createObject(admin);
@@ -182,6 +190,8 @@ public class Entering {
         System.out.println("Чтобы изменить зал, введите - 2");
         System.out.println("Чтобы изменить сеанс, введите - 3");
         System.out.println("Чтобы изменить фильм, введите - 4");
+        System.out.println("Чтобы вернуться назад - введите 5");
+
         Scanner scanner = new Scanner(System.in);
         String option = scanner.nextLine();
         switch (option) {
@@ -209,6 +219,9 @@ public class Entering {
                     updateObject(admin);
                 }
             }
+            case "5" -> {
+                manageObjects(admin);
+            }
             default -> {
                 System.out.println("Вы ввели неверное число. Попробуйте еще раз");
                 updateObject(admin);
@@ -221,6 +234,8 @@ public class Entering {
         System.out.println("Чтобы удалить зал, введите - 2");
         System.out.println("Чтобы удалить сеанс, введите - 3");
         System.out.println("Чтобы удалить фильм, введите - 4");
+        System.out.println("Чтобы вернуться назад - введите 5");
+
         Scanner scanner = new Scanner(System.in);
         String option = scanner.nextLine();
         switch (option) {
@@ -247,6 +262,9 @@ public class Entering {
                 if (isToContinue("удалить объект")) {
                     deleteObject(admin);
                 }
+            }
+            case "5" -> {
+                manageObjects(admin);
             }
             default -> {
                 System.out.println("Вы ввели неверное число. Попробуйте еще раз");
@@ -303,8 +321,8 @@ public class Entering {
             throws SQLException {
         stringToClient(tableClient.getUserDataFromDb(id), client);
         client.chooseAvailableSessions();
-        client.chooseSession();
-        client.buyTicket();
+        int idSession = client.chooseSession();
+        client.buyTicket(idSession);
         if (isToContinue("забронировать билет")) {
             bookTicketInAvailableSession(tableClient, id, client);
         } else {

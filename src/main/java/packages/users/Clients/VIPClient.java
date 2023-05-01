@@ -10,6 +10,7 @@ import packages.DB.TableSession;
 import packages.DB.users.TableClientImpl;
 import packages.MyUtils;
 import packages.objects.Hall;
+import packages.objects.Session;
 
 import java.sql.SQLException;
 import java.util.Scanner;
@@ -55,30 +56,34 @@ public class VIPClient implements Client {
 
 
     @Override
-    public void chooseSession() throws SQLException {
-        MyUtils myUtils = applicationContext.getBean(MyUtils.class);
-        myUtils.getAndSetSessionData();
+    public int chooseSession() throws SQLException {
+        return MyUtils.getSessionId();
     }
 
     @Override
-    public void buyTicket() throws SQLException {
+    public void buyTicket(int sessionId) throws SQLException {
+        // 5 - rows, 8 - columns
+        TableHall tableHall = applicationContext.getBean(TableHall.class);
+        TableSession tableSession = applicationContext.getBean(TableSession.class);
+
         Scanner scanner = new Scanner(System.in);
-        Hall hall = applicationContext.getBean(Hall.class);
+        Hall hall = tableHall.getHallData(sessionId);
+
+        Session session = tableSession.getSessionData(sessionId);
 
         while (true) {
-            if (!hall.checkAvailability(this.budget)) {
+            if (!(hall.checkAvailability(this.budget) && session.checkAvailability())) {
                 break;
             }
 
             int row = scanner.nextInt();
             int column = scanner.nextInt();
-            String placeStatus = hall.getPlaces().get(row - 1).get(column - 1);
+            String placeStatus = session.getPlaces().get(row - 1).get(column - 1);
 
             if (placeStatus.equals("-")) {
-                hall.reservePlace(row - 1, column - 1);
+                session.reservePlace(row - 1, column - 1);
 
-                TableHall tableHall = applicationContext.getBean(TableHall.class);
-                tableHall.reservePlaceInDb(hall.getId(), row, column);
+                tableSession.reservePlaceInDb(hall.getId(), row, column);
 
                 this.budget -= hall.getPrice() * 0.8;
                 this.tickets += 1;

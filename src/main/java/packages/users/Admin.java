@@ -185,7 +185,7 @@ public class Admin {
         RemovableFromDb tableCinema = applicationContext.getBean(TableCinema.class);
         ((TableCinema)tableCinema).show();
 
-        System.out.println("Введите id фильма, который хотите удалить");
+        System.out.println("Введите id кинотеатра, который хотите удалить");
         Scanner scanner = new Scanner(System.in);
         int id = scanner.nextInt();
         tableCinema.removeFromDb(id);
@@ -195,7 +195,7 @@ public class Admin {
         RemovableFromDb tableHall = applicationContext.getBean(TableHall.class);
         ((TableHall)tableHall).show();
 
-        System.out.println("Введите id фильма, который хотите удалить");
+        System.out.println("Введите id зала, который хотите удалить");
         Scanner scanner = new Scanner(System.in);
         int id = scanner.nextInt();
         tableHall.removeFromDb(id);
@@ -205,7 +205,7 @@ public class Admin {
         RemovableFromDb tableSession = applicationContext.getBean(TableSession.class);
         ((TableSession)tableSession).show();
 
-        System.out.println("Введите id фильма, который хотите удалить");
+        System.out.println("Введите id сессии, которую хотите удалить");
         Scanner scanner = new Scanner(System.in);
         int id = scanner.nextInt();
         tableSession.removeFromDb(id);
