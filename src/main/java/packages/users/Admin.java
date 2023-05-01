@@ -23,6 +23,7 @@ public class Admin {
     private String login;
     private String password;
     private String name;
+
     public void createAdminFromDb(int id, String login, String password, String name) {
         this.id = id;
         this.login = login;
@@ -30,21 +31,20 @@ public class Admin {
         this.name = name;
     }
 
-    public void createCinema () throws SQLException {
+    public void createCinema() throws SQLException {
         Creatable cinema = new Cinema();
         cinema.createByAdmin();
 
         InsertableToDb tableCinema = applicationContext.getBean(TableCinema.class);
         tableCinema.insertToDbByAdmin(cinema);
     }
-    //создаем инферфейс для объектов. создаем интерфейс для таблиц объектов
 
-    public void createHall () throws SQLException {
+    public void createHall() throws SQLException {
         Creatable hall = new Hall();
         hall.createByAdmin();
 
         TableCinema tableCinema = applicationContext.getBean(TableCinema.class);
-        if (!tableCinema.checkAvailableHalls(((Hall)hall).getCinema_id())) {
+        if (!tableCinema.checkAvailableHalls(((Hall) hall).getCinema_id())) {
             System.out.println("Свободных залов нет или кинотеатр с таким id отсутствует");
             return;
         }
@@ -52,7 +52,7 @@ public class Admin {
         tableHall.insertToDbByAdmin(hall);
     }
 
-    public void createSession () throws SQLException {
+    public void createSession() throws SQLException {
         Creatable session = new Session();
         session.createByAdmin();
 
@@ -60,7 +60,7 @@ public class Admin {
         tableSession.insertToDbByAdmin(session);
     }
 
-    public void createFilm () throws SQLException {
+    public void createFilm() throws SQLException {
         Creatable film = new Film();
         film.createByAdmin();
 
@@ -68,18 +68,18 @@ public class Admin {
         tableFilm.insertToDbByAdmin(film);
     }
 
-    public void showStats () throws SQLException {
+    public void showStats() throws SQLException {
         TablePlaces tablePlaces = applicationContext.getBean(TablePlaces.class);
         tablePlaces.showStatsAndEarnings();
     }
 
-    public void updateCinema () throws SQLException {
-        ArrayList <String> data = new ArrayList<>(4);
+    public void updateCinema() throws SQLException {
+        ArrayList<String> data = new ArrayList<>(4);
         Scanner scanner = new Scanner(System.in);
         UpdatableInDb tableCinema = applicationContext.getBean(TableCinema.class);
 
         System.out.println("Выберите id кинотеатра, который хотите изменить");
-        ((TableCinema)tableCinema).show();
+        ((TableCinema) tableCinema).show();
         int id = scanner.nextInt();
         scanner.nextLine();
 
@@ -94,13 +94,13 @@ public class Admin {
         tableCinema.updateInDbByAdmin(data);
     }
 
-    public void updateFilm () throws SQLException {
-        ArrayList <String> data = new ArrayList<>();
+    public void updateFilm() throws SQLException {
+        ArrayList<String> data = new ArrayList<>();
         Scanner scanner = new Scanner(System.in);
         UpdatableInDb tableFilm = applicationContext.getBean(TableFilm.class);
 
         System.out.println("Выберите id фильма, который хотите изменить");
-        ((TableFilm)tableFilm).show();
+        ((TableFilm) tableFilm).show();
         int id = scanner.nextInt();
         scanner.nextLine();
 
@@ -120,13 +120,13 @@ public class Admin {
         tableFilm.updateInDbByAdmin(data);
     }
 
-    public void updateHall () throws SQLException {
-        ArrayList <String> data = new ArrayList<>();
+    public void updateHall() throws SQLException {
+        ArrayList<String> data = new ArrayList<>();
         Scanner scanner = new Scanner(System.in);
         UpdatableInDb tableHall = applicationContext.getBean(TableHall.class);
 
         System.out.println("Выберите id зала, который хотите изменить");
-        ((TableHall)tableHall).show();
+        ((TableHall) tableHall).show();
         int id = scanner.nextInt();
         scanner.nextLine();
 
@@ -146,13 +146,13 @@ public class Admin {
         tableHall.updateInDbByAdmin(data);
     }
 
-    public void updateSession () throws SQLException {
-        ArrayList <String> data = new ArrayList<>();
+    public void updateSession() throws SQLException {
+        ArrayList<String> data = new ArrayList<>();
         Scanner scanner = new Scanner(System.in);
         UpdatableInDb tableSession = applicationContext.getBean(TableSession.class);
 
         System.out.println("Выберите id сессии, которую хотите изменить");
-        ((TableSession)tableSession).show();
+        ((TableSession) tableSession).show();
         int id = scanner.nextInt();
         scanner.nextLine();
 
@@ -170,10 +170,9 @@ public class Admin {
     }
 
 
-
-    public void removeFilm () throws SQLException {
+    public void removeFilm() throws SQLException {
         RemovableFromDb tableFilm = applicationContext.getBean(TableFilm.class);
-        ((TableFilm)tableFilm).show();
+        ((TableFilm) tableFilm).show();
 
         System.out.println("Введите id фильма, который хотите удалить");
         Scanner scanner = new Scanner(System.in);
@@ -181,9 +180,9 @@ public class Admin {
         tableFilm.removeFromDb(id);
     }
 
-    public void removeCinema () throws SQLException {
+    public void removeCinema() throws SQLException {
         RemovableFromDb tableCinema = applicationContext.getBean(TableCinema.class);
-        ((TableCinema)tableCinema).show();
+        ((TableCinema) tableCinema).show();
 
         System.out.println("Введите id кинотеатра, который хотите удалить");
         Scanner scanner = new Scanner(System.in);
@@ -191,9 +190,9 @@ public class Admin {
         tableCinema.removeFromDb(id);
     }
 
-    public void removeHall () throws SQLException {
+    public void removeHall() throws SQLException {
         RemovableFromDb tableHall = applicationContext.getBean(TableHall.class);
-        ((TableHall)tableHall).show();
+        ((TableHall) tableHall).show();
 
         System.out.println("Введите id зала, который хотите удалить");
         Scanner scanner = new Scanner(System.in);
@@ -201,9 +200,9 @@ public class Admin {
         tableHall.removeFromDb(id);
     }
 
-    public void removeSession () throws SQLException {
+    public void removeSession() throws SQLException {
         RemovableFromDb tableSession = applicationContext.getBean(TableSession.class);
-        ((TableSession)tableSession).show();
+        ((TableSession) tableSession).show();
 
         System.out.println("Введите id сессии, которую хотите удалить");
         Scanner scanner = new Scanner(System.in);

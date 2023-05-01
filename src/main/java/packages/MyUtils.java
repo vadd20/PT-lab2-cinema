@@ -2,10 +2,7 @@ package packages;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
-import packages.DB.TableCinema;
-import packages.DB.TableHall;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.Scanner;
@@ -14,10 +11,12 @@ import java.util.Scanner;
 public class MyUtils {
 
     private ApplicationContext applicationContext;
+
     MyUtils(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
     }
-    public static int getSessionId() throws SQLException {
+
+    public static int getSessionId() {
         Scanner scanner = new Scanner(System.in);
         int sessionId;
         try {
@@ -27,12 +26,9 @@ public class MyUtils {
             System.out.println("Вы ввели неверное число. Попробуйте еще раз");
             return getSessionId();
         }
-//        TableCinema tableCinema = applicationContext.getBean(TableCinema.class);
-//        tableCinema.getCinemaData(sessionId);
-
     }
 
-    public static ArrayList<ArrayList<String>> createEmptyArrayOfPlaces (int rows, int columns) {
+    public static ArrayList<ArrayList<String>> createEmptyArrayOfPlaces(int rows, int columns) {
         ArrayList<ArrayList<String>> places = new ArrayList<>();
         for (int i = 0; i < rows; ++i) {
             ArrayList<String> temp = new ArrayList<>();

@@ -12,7 +12,4 @@ public class Main {
         Entering entering = applicationContext.getBean(Entering.class);
         entering.start();
         }
-        // сделать так, чтобы не кидались exceptions
-    // удалить max capacity
-    // соответсвие hall id и cinema id
 }

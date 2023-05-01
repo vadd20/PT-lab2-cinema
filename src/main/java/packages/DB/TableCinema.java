@@ -9,7 +9,6 @@ import packages.objects.Creatable;
 import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Scanner;
 
 @Component
 public class TableCinema implements InsertableToDb, UpdatableInDb, RemovableFromDb {
@@ -28,7 +27,6 @@ public class TableCinema implements InsertableToDb, UpdatableInDb, RemovableFrom
                 "CREATE TABLE IF NOT EXISTS Cinemas (\n" +
                 "   id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY NOT NULL,\n" +
                 "   name text NOT NULL,\n" +
-                "   \"max capacity\" integer NOT NULL,\n" +
                 "   address text NOT NULL,\n" +
                 "   \"number of free halls\" integer NOT NULL\n" +
                 ")";
@@ -37,15 +35,14 @@ public class TableCinema implements InsertableToDb, UpdatableInDb, RemovableFrom
 
     @Override
     public void insertToDbByAdmin(Creatable cinema) throws SQLException {
-        String insertQuery = "INSERT INTO cinemas (name, \"max capacity\", address, \"number of free halls\") values (?, ?, ?, ?)";
+        String insertQuery = "INSERT INTO cinemas (name, address, \"number of free halls\") values (?, ?, ?)";
         String selectQuery = "SELECT id FROM cinemas ORDER BY id DESC LIMIT 1";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement preparedUpdateStatement = connection.prepareStatement(insertQuery);
              Statement statement = connection.createStatement()) {
             preparedUpdateStatement.setString(1, ((Cinema) cinema).getName());
-            preparedUpdateStatement.setInt(2, ((Cinema) cinema).getMaxCapacity());
-            preparedUpdateStatement.setString(3, ((Cinema) cinema).getAddress());
-            preparedUpdateStatement.setInt(4, ((Cinema) cinema).getNumberOfFreeHalls());
+            preparedUpdateStatement.setString(2, ((Cinema) cinema).getAddress());
+            preparedUpdateStatement.setInt(3, ((Cinema) cinema).getNumberOfFreeHalls());
             preparedUpdateStatement.execute();
 
             ResultSet rs = statement.executeQuery(selectQuery);
@@ -89,7 +86,7 @@ public class TableCinema implements InsertableToDb, UpdatableInDb, RemovableFrom
     }
 
     @Override
-    public void updateInDbByAdmin(ArrayList <String> data) throws SQLException {
+    public void updateInDbByAdmin(ArrayList<String> data) throws SQLException {
         String updateQuery = "UPDATE cinemas SET name = ?, address = ?, \"number of free halls\" = ?" +
                 " WHERE id = ?";
         try (Connection connection = dataSource.getConnection();

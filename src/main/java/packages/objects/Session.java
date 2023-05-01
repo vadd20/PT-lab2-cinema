@@ -2,16 +2,10 @@ package packages.objects;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import packages.DB.TableHall;
-import packages.DB.TableSession;
 import packages.MyUtils;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -44,8 +38,9 @@ public class Session implements Creatable {
 
         this.places = MyUtils.createEmptyArrayOfPlaces(rows, columns);
     }
-    public void createSessionFromDb (int id, int hall_id, int film_id, String time,
-    ArrayList<ArrayList<String>> places, int rows, int columns) {
+
+    public void createSessionFromDb(int id, int hall_id, int film_id, String time,
+                                    ArrayList<ArrayList<String>> places, int rows, int columns) {
         this.id = id;
         this.hall_id = hall_id;
         this.film_id = film_id;
@@ -59,7 +54,7 @@ public class Session implements Creatable {
         places.get(row).set(column, "*");
     }
 
-    public void showPlaces () {
+    public void showPlaces() {
         System.out.printf("%2s", " ");
         for (int i = 0; i < columns; ++i) {
             System.out.printf("%2s", i + 1);
@@ -74,7 +69,7 @@ public class Session implements Creatable {
         }
     }
 
-    public Boolean checkAvailability () {
+    public Boolean checkAvailability() {
         if (!this.existsFreePlace()) {
             System.out.println("В этом зале нет мест.");
             return false;

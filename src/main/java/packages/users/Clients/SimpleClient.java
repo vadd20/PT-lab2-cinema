@@ -27,8 +27,7 @@ public class SimpleClient implements Client {
         this.applicationContext = applicationContext;
     }
 
-    @Setter
-    private int id;
+    @Setter private int id;
     private String login;
     private String password;
     private String name;
@@ -52,8 +51,8 @@ public class SimpleClient implements Client {
         this.tickets = tickets;
     }
 
-    public void createNewClient (String login, String password, String name, String number,
-                                 String email, int budget) {
+    public void createNewClient(String login, String password, String name, String number,
+                                String email, int budget) {
         this.login = login;
         this.password = password;
         this.name = name;
@@ -71,13 +70,12 @@ public class SimpleClient implements Client {
     }
 
     @Override
-    public int chooseSession() throws SQLException {
+    public int chooseSession() {
         return MyUtils.getSessionId();
     }
 
     @Override
     public void buyTicket(int sessionId) throws SQLException {
-        // 5 - rows, 8 - columns
         TableHall tableHall = applicationContext.getBean(TableHall.class);
         TableSession tableSession = applicationContext.getBean(TableSession.class);
 

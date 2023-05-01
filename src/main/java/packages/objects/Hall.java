@@ -4,21 +4,19 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.stereotype.Component;
 
-import java.sql.SQLException;
 import java.util.Scanner;
 
 @Getter
 @Component
 public class Hall implements Creatable {
-    @Setter
-    private int id;
+    @Setter private int id;
     private int cinema_id;
     private int rows;
     private int columns;
     private int price;
     private String type;
 
-    public void createByAdmin() throws SQLException {
+    public void createByAdmin() {
         System.out.println("введи количество рядов, количество место, цену, тип зала, и id кинотеатра");
         Scanner scanner = new Scanner(System.in);
         int rows = scanner.nextInt();
@@ -51,7 +49,5 @@ public class Hall implements Creatable {
         }
         return true;
     }
-
-
 
 }

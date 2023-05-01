@@ -1,11 +1,10 @@
 package packages.DB;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import packages.MyUtils;
+import org.springframework.stereotype.Component;
 import packages.objects.Creatable;
 import packages.objects.Hall;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
 import java.sql.*;

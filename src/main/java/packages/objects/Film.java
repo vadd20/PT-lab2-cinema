@@ -2,7 +2,6 @@ package packages.objects;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.stereotype.Component;
 
 import java.util.Scanner;
 
@@ -15,12 +14,12 @@ public class Film implements Creatable {
     private int time;
     private String format;
 
-    public void createByAdmin () {
-        System.out.println("введи название, год, жанр, длительность, формат");
+    public void createByAdmin() {
+        System.out.println("Введите название, год, жанр, длительность, формат");
         Scanner scanner = new Scanner(System.in);
         String name = scanner.nextLine();
         int year = scanner.nextInt();
-        scanner.next();
+        scanner.nextLine();
         String genre = scanner.nextLine();
         int time = scanner.nextInt();
         String format = scanner.next();

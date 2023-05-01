@@ -10,22 +10,24 @@ import java.sql.*;
 public class TablePlaces {
 
     private DataSource dataSource;
+    private final TableSession tableSession;
 
     @Autowired
-    TablePlaces(DataSource dataSource) throws SQLException {
+    TablePlaces(DataSource dataSource, TableSession tableSession) throws SQLException {
+        this.tableSession = tableSession;
         this.dataSource = dataSource;
         initDb();
     }
 
     private void initDb() throws SQLException {
-        String createSessionTable = "" +
+        String createPlacesTable = "" +
                 "CREATE TABLE IF NOT EXISTS places (" +
                 "id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY NOT NULL," +
                 "session_id integer REFERENCES sessions(id) NOT NULL," +
                 "row_value integer NOT NULL," +
                 "column_value integer NOT NULL," +
                 "value text NOT NULL)";
-        DbUtil.applyDdl(createSessionTable, dataSource);
+        DbUtil.applyDdl(createPlacesTable, dataSource);
     }
 
     public void showStatsAndEarnings() throws SQLException {
@@ -40,8 +42,7 @@ public class TablePlaces {
 
             ResultSet rs = statement.executeQuery(selectQuery);
             int totalEarn = 0;
-            while (rs.next())
-            {
+            while (rs.next()) {
                 System.out.println("Номер зала - " + rs.getInt(1) + ". Количество проданных билетов - " + rs.getInt(2));
                 totalEarn += rs.getInt(2) * rs.getInt(3);
             }
@@ -54,7 +55,7 @@ public class TablePlaces {
         String deleteQuery = "DELETE FROM places WHERE session_id = ?";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement preparedSelectPlacesStatement = connection.prepareStatement(selectPlacesQuery);
-            PreparedStatement preparedDeleteStatement = connection.prepareStatement(deleteQuery)) {
+             PreparedStatement preparedDeleteStatement = connection.prepareStatement(deleteQuery)) {
             preparedSelectPlacesStatement.setInt(1, id);
             ResultSet placesRs = preparedSelectPlacesStatement.executeQuery();
             if (placesRs.next()) {

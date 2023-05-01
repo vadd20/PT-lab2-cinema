@@ -1,10 +1,10 @@
 package packages.DB;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Component;
 import packages.objects.Creatable;
 import packages.objects.Film;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -42,16 +42,16 @@ public class TableFilm implements InsertableToDb, UpdatableInDb, RemovableFromDb
         try (Connection connection = dataSource.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(insertQuery);
              Statement statement = connection.createStatement()) {
-            preparedStatement.setString(1, ((Film)film).getName());
-            preparedStatement.setInt(2, ((Film)film).getYear());
-            preparedStatement.setString(3, ((Film)film).getGenre());
-            preparedStatement.setInt(4, ((Film)film).getTime());
-            preparedStatement.setString(5, ((Film)film).getFormat());
+            preparedStatement.setString(1, ((Film) film).getName());
+            preparedStatement.setInt(2, ((Film) film).getYear());
+            preparedStatement.setString(3, ((Film) film).getGenre());
+            preparedStatement.setInt(4, ((Film) film).getTime());
+            preparedStatement.setString(5, ((Film) film).getFormat());
             preparedStatement.execute();
 
             ResultSet rs = statement.executeQuery(selectQuery);
             rs.next();
-            ((Film)film).setId(rs.getInt(1));
+            ((Film) film).setId(rs.getInt(1));
         }
     }
 

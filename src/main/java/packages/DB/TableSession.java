@@ -1,14 +1,11 @@
 package packages.DB;
 
-import org.postgresql.util.LruCache;
-import packages.MyUtils;
-import packages.objects.Creatable;
-import packages.objects.Hall;
-import packages.objects.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
-import packages.objects.Updatable;
+import packages.MyUtils;
+import packages.objects.Creatable;
+import packages.objects.Session;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -29,16 +26,16 @@ public class TableSession implements InsertableToDb, UpdatableInDb, RemovableFro
 
     private void initDb() throws SQLException {
         String createSessionTable = "" +
-                "CREATE TABLE IF NOT EXISTS Sessions (\n" +
+                "CREATE TABLE IF NOT EXISTS sessions (\n" +
                 "   id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY NOT NULL,\n" +
-                "   hall_id integer REFERENCES Cinemas(id) NOT NULL,\n" +
-                "   film_id integer REFERENCES Films(id) NOT NULL,\n" +
+                "   hall_id integer REFERENCES halls(id) NOT NULL,\n" +
+                "   film_id integer REFERENCES films(id) NOT NULL,\n" +
                 "   time text NOT NULL\n" +
                 ")";
         DbUtil.applyDdl(createSessionTable, dataSource);
     }
 
-    public Session getSessionData (int id) throws SQLException{
+    public Session getSessionData(int id) throws SQLException {
         String selectQuery = "" +
                 "   SELECT id, hall_id, film_id, time time FROM sessions WHERE id = ?";
         try (Connection connection = dataSource.getConnection();
@@ -50,7 +47,7 @@ public class TableSession implements InsertableToDb, UpdatableInDb, RemovableFro
         }
     }
 
-    private Session rsToSession (ResultSet rs) throws SQLException {
+    private Session rsToSession(ResultSet rs) throws SQLException {
         int id = rs.getInt(1);
         int hall_id = rs.getInt(2);
         int film_id = rs.getInt(3);
@@ -65,12 +62,13 @@ public class TableSession implements InsertableToDb, UpdatableInDb, RemovableFro
         session.createSessionFromDb(id, hall_id, film_id, time, places, rows, columns);
         return session;
     }
-    private ArrayList<ArrayList<String>> getPlacesFromDb (int hall_id, int rows, int columns) throws SQLException {
+
+    private ArrayList<ArrayList<String>> getPlacesFromDb(int hall_id, int rows, int columns) throws SQLException {
         String selectQuery = "" +
                 "   SELECT row_value, column_value, value " +
                 "   FROM places WHERE session_id = ?";
         try (Connection connection = dataSource.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(selectQuery)){
+             PreparedStatement preparedStatement = connection.prepareStatement(selectQuery)) {
             preparedStatement.setInt(1, hall_id);
             ResultSet resultSet = preparedStatement.executeQuery();
 
@@ -91,7 +89,7 @@ public class TableSession implements InsertableToDb, UpdatableInDb, RemovableFro
         }
     }
 
-    public void reservePlaceInDb (int id, int row, int column) throws SQLException {
+    public void reservePlaceInDb(int id, int row, int column) throws SQLException {
         String updateQuery = "UPDATE places SET value = '*' WHERE session_id = ? AND row_value = ? AND column_value = ?";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(updateQuery)) {
@@ -119,12 +117,12 @@ public class TableSession implements InsertableToDb, UpdatableInDb, RemovableFro
 
 
             addPlacesToTable(((Session) session).getPlaces(), ((Session) session).getRows(),
-                    ((Session)session).getColumns(), ((Session)session).getId());
+                    ((Session) session).getColumns(), ((Session) session).getId());
         }
     }
 
 
-    private void addPlacesToTable (ArrayList<ArrayList<String>> places, int rows, int columns, int id) throws SQLException {
+    private void addPlacesToTable(ArrayList<ArrayList<String>> places, int rows, int columns, int id) throws SQLException {
         String insertQuery = "INSERT INTO places (session_id, row_value, column_value, value) values (?, ?, ?, ?)";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
@@ -134,10 +132,10 @@ public class TableSession implements InsertableToDb, UpdatableInDb, RemovableFro
                     preparedStatement.setInt(2, i + 1);
                     preparedStatement.setInt(3, j + 1);
                     preparedStatement.setString(4, places.get(i).get(j));
-                    preparedStatement.execute();
+                    preparedStatement.addBatch();
                 }
             }
-            //preparedStatement.executeBatch();
+            preparedStatement.executeBatch();
         }
     }
 

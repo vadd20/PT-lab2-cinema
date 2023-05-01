@@ -27,8 +27,7 @@ public class FriendClient implements Client {
         this.applicationContext = applicationContext;
     }
 
-    @Setter
-    private int id;
+    @Setter private int id;
     private String login;
     private String password;
     private String name;
@@ -58,13 +57,12 @@ public class FriendClient implements Client {
     }
 
     @Override
-    public int chooseSession() throws SQLException {
+    public int chooseSession() {
         return MyUtils.getSessionId();
     }
 
     @Override
     public void buyTicket(int sessionId) throws SQLException {
-        // 5 - rows, 8 - columns
         TableHall tableHall = applicationContext.getBean(TableHall.class);
         TableSession tableSession = applicationContext.getBean(TableSession.class);
 

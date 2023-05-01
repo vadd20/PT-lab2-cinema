@@ -54,7 +54,7 @@ public class TableClientImpl implements TableUser {
     }
 
     @Override
-    public int getIdByLoginPassword (String login, String password) throws SQLException {
+    public int getIdByLoginPassword(String login, String password) throws SQLException {
         String selectQuery = "SELECT id FROM clients WHERE login = ? and password = ?";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(selectQuery)) {
@@ -67,7 +67,7 @@ public class TableClientImpl implements TableUser {
     }
 
     @Override
-    public ArrayList<String> getUserDataFromDb (int id) throws SQLException {
+    public ArrayList<String> getUserDataFromDb(int id) throws SQLException {
         String selectQuery = "SELECT id, login, password, name, number, email, budget, tickets " +
                 "FROM clients WHERE id = ?";
         try (Connection connection = dataSource.getConnection();
@@ -86,7 +86,7 @@ public class TableClientImpl implements TableUser {
         }
     }
 
-    public String checkStatus (int id) throws SQLException {
+    public String checkStatus(int id) throws SQLException {
         String selectQuery = "SELECT type FROM clients WHERE id = ?";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(selectQuery)) {
@@ -97,7 +97,7 @@ public class TableClientImpl implements TableUser {
         }
     }
 
-    public void reduceBudgetAndIncreaseTickets (int id, int newBudget, int tickets) throws SQLException {
+    public void reduceBudgetAndIncreaseTickets(int id, int newBudget, int tickets) throws SQLException {
         String updateQuery = "UPDATE clients SET budget = ?, tickets = ? WHERE id = ?";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(updateQuery)) {
@@ -109,7 +109,7 @@ public class TableClientImpl implements TableUser {
     }
 
 
-    public void changeStatus (int id, String newStatus) throws SQLException {
+    public void changeStatus(int id, String newStatus) throws SQLException {
         String updateQuery = "UPDATE clients SET type = ? WHERE id = ?";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(updateQuery)) {
@@ -145,6 +145,7 @@ public class TableClientImpl implements TableUser {
         simpleClient.createNewClient(login, password, name, number, email, budget);
         addNewSimpleClient(simpleClient);
     }
+
     public void addNewSimpleClient(SimpleClient client) throws SQLException {
         String insertQuery = "INSERT INTO clients (login, password, name, number, email, budget, type, tickets) " +
                 "values (?, ?, ?, ?, ?, ?, ?, ?)";

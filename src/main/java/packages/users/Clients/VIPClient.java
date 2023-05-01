@@ -22,9 +22,10 @@ public class VIPClient implements Client {
     private ApplicationContext applicationContext;
 
     @Autowired
-    public VIPClient (ApplicationContext applicationContext) {
+    public VIPClient(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
     }
+
     @Setter private int id;
     private String login;
     private String password;
@@ -49,20 +50,19 @@ public class VIPClient implements Client {
     }
 
     @Override
-    public void chooseAvailableSessions () throws SQLException {
+    public void chooseAvailableSessions() throws SQLException {
         TableSession tableSession = applicationContext.getBean(TableSession.class);
         tableSession.showAvailableSessions(status);
     }
 
 
     @Override
-    public int chooseSession() throws SQLException {
+    public int chooseSession() {
         return MyUtils.getSessionId();
     }
 
     @Override
     public void buyTicket(int sessionId) throws SQLException {
-        // 5 - rows, 8 - columns
         TableHall tableHall = applicationContext.getBean(TableHall.class);
         TableSession tableSession = applicationContext.getBean(TableSession.class);
 
